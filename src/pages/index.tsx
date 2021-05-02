@@ -22,26 +22,20 @@ type Episode = {
 }
 
 type HomeProps = {
-  // Array de Generic(tipo que pode ser uma função, receber parâmetros)
   latestEpisodes: Episode[];
   allEpisodes: Episode[];
 }
 
 export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
-  /* Fetching api data with SPA strategy */
-  // useEffect(() => {
-  //   fetch('http://localhost:3333/episodes')
-  //     .then(response => response.json())
-  //     .then(data => console.log(data))
-  // }, []);
-  const { play } = useContext(PlayerContext);
+  const { playEpisodeList } = useContext(PlayerContext);
+  const episodeList = [...latestEpisodes, ...allEpisodes];
 
   return (
     <div className={styles.homepage}>
       <section className={styles.latestEpisodes}>
         <h2>Últimos lançamentos</h2>
         <ul>
-          {latestEpisodes.map(episode => {
+          {latestEpisodes.map((episode, index) => {
             return (
               <li key={episode.id}>
                 <Image 
@@ -63,7 +57,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                 <button type="button">
                   <img 
                     src="/play-green.svg" 
-                    onClick={() => play(episode)} 
+                    onClick={() => playEpisodeList(episodeList, index)} 
                     alt="Tocar episódio"
                   />
                 </button>
@@ -87,7 +81,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
             </tr>
           </thead>
           <tbody>
-            {allEpisodes.map(episode => {
+            {allEpisodes.map((episode, index) => {
               return (
                 <tr key={episode.id}>
                   <td style={{ width: 72 }}>
@@ -114,7 +108,10 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                     {episode.durationAsString}
                   </td>
                   <td>
-                    <button type="button">
+                    <button 
+                      type="button"
+                      onClick={() => playEpisodeList(episodeList, index + latestEpisodes.length)}
+                    >
                       <img src="/play-green.svg" alt="Tocar episódio"/>
                     </button>
                   </td>
@@ -128,23 +125,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
   )
 }
 
-/* Fetching api data with the SSR strategy */
-// export const getServerSideProps: GetStaticProps = async () => {
-//   /* This data is loaded everytime someone access the application */
-//   const response = await fetch('http://localhost:3333/episodes');
-//   const data = await response.json();
-
-//   return { 
-//     props: {
-//       episodes: data,
-//     }
-//   }
-// }
-
-/* Fetching api data with the SSR(Server-Side Rendering) strategy */
-// - Só funciona em produção!
 export const getStaticProps: GetStaticProps = async () => {
-  // This data is loaded everytime someone access the application
   const { data } = await api.get('episodes', {
     params: {
       _limit: 12,
@@ -180,7 +161,6 @@ export const getStaticProps: GetStaticProps = async () => {
       latestEpisodes: latestEpisodes,
       allEpisodes: allEpisodes,
     },
-    // Propriedade que torna essa requisição SSG(Static Site Generation)
-    revalidate: 60 * 60 * 8, // 8 horas
+    revalidate: 60 * 60 * 8, // 8 hours
   }
 }

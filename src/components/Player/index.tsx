@@ -12,7 +12,10 @@ export function Player() {
     episodeList, 
     currentEpisodeIndex, 
     isPlaying, 
-    togglePlay } = useContext(PlayerContext);
+    togglePlay,
+    setPlayingState,
+    playNext,
+    playPrevious } = useContext(PlayerContext);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -73,6 +76,8 @@ export function Player() {
             src={episode.url}
             ref={audioRef}
             autoPlay
+            onPlay={() => setPlayingState(true)}
+            onPause={() => setPlayingState(false)}
           />
         )}
 
@@ -81,7 +86,11 @@ export function Player() {
             <img src="/shuffle.svg" alt="Embaralhar" />
           </button>
           <button type="button" disabled={!episode}>
-            <img src="/play-previous.svg" alt="Tocar anterior"/>
+            <img 
+              src="/play-previous.svg" 
+              alt="Tocar anterior"
+              onClick={playPrevious}
+            />
           </button>
           <button 
             type="button" 
@@ -95,7 +104,11 @@ export function Player() {
             }
           </button>
           <button type="button" disabled={!episode}>
-            <img src="/play-next.svg" alt="Tocar próxima" />
+            <img 
+              src="/play-next.svg" 
+              alt="Tocar próxima" 
+              onClick={playNext} 
+            />
           </button>
           <button type="button" disabled={!episode}>
             <img src="/repeat.svg" alt="Repetir"/>
