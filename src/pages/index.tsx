@@ -7,6 +7,8 @@ import { api } from '../services/api';
 import { convertDurationToTimeString } from '../utils/convertDurationToTimeString';
 
 import styles from './home.module.scss';
+import { useContext } from 'react';
+import { PlayerContext } from '../contexts/PlayerContext';
 
 type Episode = {
   id: string;
@@ -32,6 +34,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
   //     .then(response => response.json())
   //     .then(data => console.log(data))
   // }, []);
+  const { play } = useContext(PlayerContext);
 
   return (
     <div className={styles.homepage}>
@@ -58,7 +61,11 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                   <span>{episode.durationAsString}</span>
                 </div>
                 <button type="button">
-                  <img src="/play-green.svg" alt="Tocar episódio"/>
+                  <img 
+                    src="/play-green.svg" 
+                    onClick={() => play(episode)} 
+                    alt="Tocar episódio"
+                  />
                 </button>
               </li>
             )
@@ -136,7 +143,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
 
 /* Fetching api data with the SSR(Server-Side Rendering) strategy */
 // - Só funciona em produção!
-export const getServerSideProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   // This data is loaded everytime someone access the application
   const { data } = await api.get('episodes', {
     params: {
@@ -145,6 +152,12 @@ export const getServerSideProps: GetStaticProps = async () => {
       _order: 'desc'
     }
   });
+
+  if (!data) {
+    return {
+      notFound: true,
+    }
+  }
 
   const episodes = data.map((episode): Episode => {
     return {
@@ -166,8 +179,8 @@ export const getServerSideProps: GetStaticProps = async () => {
     props: {
       latestEpisodes: latestEpisodes,
       allEpisodes: allEpisodes,
-      // Propriedade que torna essa requisição SSG(Static Site Generation)
-      revalidate: 60 * 60 * 8, // 8 horas
     },
+    // Propriedade que torna essa requisição SSG(Static Site Generation)
+    revalidate: 60 * 60 * 8, // 8 horas
   }
 }
