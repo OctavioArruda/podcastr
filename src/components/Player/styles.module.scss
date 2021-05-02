@@ -115,7 +115,7 @@
       border-radius: 1rem;
       background: var(--purple-800);
 
-      &:hover {
+      &:hover:not(:disabled) {
         filter: brightness(0.95 );
       }
     }
